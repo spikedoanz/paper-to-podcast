@@ -4,8 +4,6 @@ import openai
 import json
 import os
 
-from representative         import Representative
-from interviewer            import Interviewer
 from extract                import *
 from utilities              import *
 
@@ -20,7 +18,6 @@ def chat_topic(interviewer, representative, topic, subtopics, rounds, context):
     log_interviewer =       []
     log_representative =    []
     context =               representative.summarize_topic(topic, subtopics, context)
-    record =                []
 
     print("---------Topic---------------")
     question = interviewer.ask_topic(
@@ -66,3 +63,12 @@ def chat_topic(interviewer, representative, topic, subtopics, rounds, context):
         print(representative.name + ": " + answer)
         log_representative.extend([{"role": "assistant", "content": question}])
         log_interviewer.extend([{"role": "user", "content": question}])
+
+    return log_representative 
+    """
+    record =                    log_representative
+    path =                      f"./examples/{formatted_time()}.json" 
+    data =                      {"record": record}
+    with open(path, "w") as f:
+        json.dump(data)
+    """

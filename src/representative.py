@@ -1,27 +1,25 @@
-from pdfminer.high_level import extract_text
-import re
-from itertools import chain
 import openai
 import json
-from dotenv import load_dotenv
-from pathlib import Path
 import os
-env_path = Path('.')/'.env'
-load_dotenv(dotenv_path=env_path)
-openai.api_key = token=os.environ['CHAT_TOKEN']
+from dotenv                 import load_dotenv
+from pathlib                import Path
+
+env_path =                  Path('.')/'.env'
+load_dotenv(dotenv_path =   env_path)
+openai.api_key =            token=os.environ['CHAT_TOKEN']
 
 class Representative:
     def __init__(self, name, gender, personality, expertise, brevity, interests, paper, model):
-        self.name = name
-        self.gender = gender
-        self.personality = personality
-        self.expertise = expertise
-        self.brevity = brevity
-        self.interests = interests
-        self.record = []
-        self.memory = []
-        self.paper = paper
-        self.model = model
+        self.name =             name
+        self.gender =           gender
+        self.personality =      personality
+        self.expertise =        expertise
+        self.brevity =          brevity
+        self.interests =        interests
+        self.record =           []
+        self.memory =           []
+        self.paper =            paper
+        self.model =            model
         self.identity = (
             f"You are a {self.gender} representative named {self.name}, doing an interview for a group of researchers. "
             f"You're known for your {self.personality}. "
@@ -33,7 +31,7 @@ class Representative:
             f"10/10 writing quality is a top writer and 1/10 writing quality is a terrible writer. You are a 9/10 writer. "
         )
     def chat(self, user_prompt):
-        system_prompt = self.identity
+        system_prompt =         self.identity
         system_prompt += (
             f"Today's talk is about a paper called \"{self.paper}\", "
             "You're being interviewed by Ody, but don't point this out, just have a normal conversation with him "
@@ -41,15 +39,15 @@ class Representative:
         messages = [
             {"role": "system", "content": system_prompt},
         ]
-        messages += self.memory
+        messages +=             self.memory
         messages += [{"role": "user", "content": user_prompt}]
         response =  openai.ChatCompletion.create(
-                model=self.model,
-                messages= messages,
-                temperature = 0.8,
+                model=          self.model,
+                messages=       messages,
+                temperature =   0.8,
                 )
         self.record.append(response)
-        assistant_response = response['choices'][0]['message']['content']
+        assistant_response =    response['choices'][0]['message']['content']
         self.memorize(user_prompt, assistant_response)
         return assistant_response
     
@@ -78,7 +76,7 @@ class Representative:
     def critical_thinking(self):
         pass  # Implementation of critical thinking functionality
     def self_introduction(self, user_prompt):
-        system_prompt = self.identity
+        system_prompt =         self.identity
         system_prompt += (
             "Introduce the paper to your audience, who already know you're a representative, "
             "and are here for an interview, not to hear about who you are. "
@@ -86,7 +84,7 @@ class Representative:
             "You're being interviewed by Ody, but don't point this out, just have a normal conversation with him "
         )
         response =  openai.ChatCompletion.create(
-                model=self.model,
+                model=          self.model,
                 messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
@@ -103,7 +101,7 @@ class Representative:
         self.memory.append(user)
         self.memory.append(assistant)
     def reply (self, topic, subtopics_string, participant, conversation_log, context):
-        system_prompt = self.identity
+        system_prompt =         self.identity
         system_prompt += (
             f"Today's talk is about a paper called \"{self.paper}\", "
             f"You're currently talking about {topic}, and might go in depth about {subtopics_string}"
@@ -118,14 +116,14 @@ class Representative:
         ]
         messages.extend(conversation_log)
         response =  openai.ChatCompletion.create(
-                        model=self.model,
+                        model=  self.model,
                         messages= messages, 
                         temperature = 1.2 
                         )
         self.record.append(response)
         return response['choices'][0]['message']['content']
     def summarize_topic(self, topic, subtopics, chunk):
-        system_prompt = self.identity
+        system_prompt =         self.identity
         system_prompt += (
             f"You are preparing notes for your own use for an interview discussing the paper \"{self.paper}\", "
             f"The topic that you are preparing about is {topic}, which contains the subtopics: {subtopics}. "
@@ -135,24 +133,24 @@ class Representative:
         )
         user_prompt = ""
         response =  openai.ChatCompletion.create(
-                model=self.model,
+                model=          self.model,
                 messages=[
                         {"role": "system", "content": system_prompt},
                 ],
-                temperature = 0.8,
-                max_tokens = 1000
+                temperature =   0.8,
+                max_tokens =    1000
                 )
         self.record.append(response)
         return response['choices'][0]['message']['content']
     
     def tokens_used(self):
-        sum_prompt_tokens = 0
+        sum_prompt_tokens =     0
         sum_completion_tokens = 0
-        sum_total_tokens = 0
+        sum_total_tokens =      0
         for record in self.record:
-            prompt_tokens = record['usage']['prompt_tokens']
+            prompt_tokens =     record['usage']['prompt_tokens']
             completion_tokens = record['usage']['completion_tokens']
-            total_tokens = record['usage']['total_tokens']
+            total_tokens =      record['usage']['total_tokens']
             #print(prompt_token, completion_tokens, total_tokens)
             sum_prompt_tokens += prompt_tokens
             sum_completion_tokens += completion_tokens
