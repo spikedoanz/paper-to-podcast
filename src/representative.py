@@ -102,24 +102,66 @@ class Representative:
         assistant = {"role": "assistant", "content": assistant_response}
         self.memory.append(user)
         self.memory.append(assistant)
-    def answer_topic(self, question, topic, chunk):
+    def reply (self, topic, subtopics_string, participant, conversation_log, context):
         system_prompt = self.identity
         system_prompt += (
             f"Today's talk is about a paper called \"{self.paper}\", "
-            "You're being interviewed by Ody, but don't point this out, just have a normal conversation with him. "
-            f"The section of the paper you're currently discussing attached here:\n{chunk}, "
-            "just give a few sentence briefing on the topic at hand, no need to go into specifics. "
+            f"You're currently talking about {topic}, and might go in depth about {subtopics_string}"
+            f"The section of the paper you're currently discussing attached here:\n{context}\n "
+            f"just give a few sentences briefing on the topic at hand, don't go into specifics unless if asked by {participant}. "
             "Don't give a conclusion or overview of what you discuss. Wait for Ody to prompt you before doing so. "
             "Do NOT give a conclusion. Ody will stop talking to you and will be very sad. "
         )
-        user_prompt = question
+        #user_prompt = user_prompt 
+        messages = [
+            {"role": "system", "content" : system_prompt}
+        ]
+        messages.extend(conversation_log)
+        response =  openai.ChatCompletion.create(
+                        model=self.model,
+                        messages= messages, 
+                        temperature = 1.2 
+                        )
+        self.record.append(response)
+        return response['choices'][0]['message']['content']
+    def summarize_topic(self, topic, subtopics, chunk):
+        system_prompt = self.identity
+        system_prompt += (
+            f"You are preparing notes for your own use for an interview discussing the paper \"{self.paper}\", "
+            f"The topic that you are preparing about is {topic}, which contains the subtopics: {subtopics}. "
+            "Make sure that your notes have all the information that you will need, "
+            "and put extreme care into accuracy of the information. "
+            f"The section of the paper you're summarizing is attached here:\n{chunk}"
+        )
+        user_prompt = ""
         response =  openai.ChatCompletion.create(
                 model=self.model,
                 messages=[
                         {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                temperature = 1.2
+                ],
+                temperature = 0.8,
+                max_tokens = 1000
                 )
         self.record.append(response)
         return response['choices'][0]['message']['content']
+    
+    def tokens_used(self):
+        sum_prompt_tokens = 0
+        sum_completion_tokens = 0
+        sum_total_tokens = 0
+        for record in self.record:
+            prompt_tokens = record['usage']['prompt_tokens']
+            completion_tokens = record['usage']['completion_tokens']
+            total_tokens = record['usage']['total_tokens']
+            #print(prompt_token, completion_tokens, total_tokens)
+            sum_prompt_tokens += prompt_tokens
+            sum_completion_tokens += completion_tokens
+            sum_total_tokens += total_tokens
+        print(
+            "\n\n\n-----------------------------------\n"
+            f" * {self.name} token usage report:\n"
+            f"Prompt tokens: {sum_prompt_tokens}\n"
+            f"Completion tokens: {sum_completion_tokens}\n"
+            f"Total tokens: {sum_total_tokens}\n"
+        )
+        #return(sum_prompt_tokens, sum_completion_tokens, sum_total_tokens)

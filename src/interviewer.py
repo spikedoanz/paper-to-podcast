@@ -132,3 +132,69 @@ class Interviewer:
                 )
         self.record.append(response)
         return response['choices'][0]['message']['content']
+             
+    def ask_topic(self, topic, subtopics, participant):
+        system_prompt = self.identity
+        if (subtopics != "<|no subtopics|>"):
+            subtopic_string  =  f"Do not be overly detailed, leave some room to discuss other topics. Simply ask a broad open question to let {participant} talk."
+        system_prompt += (
+            f"The title of the paper is \"{self.paper}\", "
+            f"You are interviewing {participant}, representative of the writers of the paper. "
+            "but don't point this out, just have a normal conversation with them. "
+            "Simply start talking, no formating is required. "
+            "You've already said hi to them, this is the middle of the conversation. "
+            "You've already introduced the name of the paper, so don't mention it again. "
+            f"You want to ask {participant} about {topic}. {subtopic_string}"
+            f"Ask the question naturally, and DONT just go 'I'd like to hear about {topic} from the paper please', "
+            f"That sounds very condescending to {participant} and they will leave if you say so"
+        )
+        response =  openai.ChatCompletion.create(
+                        model=self.model,
+                        messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": "Is there any topic in particular you'd like to hear about?"}
+                            ],
+                        temperature = 1.2 
+                        )
+        self.record.append(response)
+        return response['choices'][0]['message']['content']
+    def ask_subtopic(self, topic, subtopics_string, participant, conversation_log):
+        system_prompt = self.identity
+        system_prompt += (
+            f"The title of the paper is {self.paper}"
+            f"You are interviewing {participant}, representative of the writers of the paper. "
+            f"You are currently in a discussion about {topic}. "
+            f"Now, you want to delve into more detail about one of the following topics: {subtopics_string} "
+        )
+        #user_prompt = userprompt
+        messages = [
+            {"role": "system", "content" : system_prompt}
+        ]
+        messages.extend(conversation_log)
+        response =  openai.ChatCompletion.create(
+                        model=self.model,
+                        messages= messages, 
+                        temperature = 1.2 
+                        )
+        self.record.append(response)
+        return response['choices'][0]['message']['content']
+    def tokens_used(self):
+        sum_prompt_tokens = 0
+        sum_completion_tokens = 0
+        sum_total_tokens = 0
+        for record in self.record:
+            prompt_tokens = record['usage']['prompt_tokens']
+            completion_tokens = record['usage']['completion_tokens']
+            total_tokens = record['usage']['total_tokens']
+            #print(prompt_token, completion_tokens, total_tokens)
+            sum_prompt_tokens += prompt_tokens
+            sum_completion_tokens += completion_tokens
+            sum_total_tokens += total_tokens
+        print(
+            "\n\n\n-----------------------------------\n"
+            f" * {self.name} token usage report:\n"
+            f"Prompt tokens: {sum_prompt_tokens}\n"
+            f"Completion tokens: {sum_completion_tokens}\n"
+            f"Total tokens: {sum_total_tokens}\n"
+        )
+        #return(sum_prompt_tokens, sum_completion_tokens, sum_total_tokens)
