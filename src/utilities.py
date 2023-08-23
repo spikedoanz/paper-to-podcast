@@ -16,7 +16,7 @@ from utilities                  import  *
 
 def formatted_time() -> str:
     now =                       datetime.now()
-    formatted_time =            now.strftime('%H:%M-%d-%m-%Y')
+    formatted_time =            now.strftime('%H-%M-%d-%m-%Y')
     return formatted_time
 
 def format_subtopics_with_quotes(subtopics: list[str]) -> str:

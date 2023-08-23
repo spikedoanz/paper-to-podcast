@@ -25,7 +25,7 @@ def chat_topic(interviewer, representative, topic, subtopics, rounds, context):
         subtopics =         subtopics,
         participant =       representative.name
     )
-    print(interviewer.name + ": " + question)
+    print(interviewer.name + ": " + question + "\n")
     log_representative.extend([{"role": "user", "content": question}])
     log_interviewer.extend([{"role": "assistant", "content": question}])
 
@@ -36,9 +36,9 @@ def chat_topic(interviewer, representative, topic, subtopics, rounds, context):
         conversation_log =  log_representative,
         context =           context,
     )
-    print(representative.name + ": " + answer)
-    log_representative.extend([{"role": "assistant", "content": question}])
-    log_interviewer.extend([{"role": "user", "content": question}])
+    print(representative.name + ": " + answer + "\n")
+    log_representative.extend([{"role": "assistant", "content": answer}])
+    log_interviewer.extend([{"role": "user", "content": answer}])
 
     
     for i in range(rounds):
@@ -61,14 +61,7 @@ def chat_topic(interviewer, representative, topic, subtopics, rounds, context):
         context =               context,
         )
         print(representative.name + ": " + answer)
-        log_representative.extend([{"role": "assistant", "content": question}])
-        log_interviewer.extend([{"role": "user", "content": question}])
-
+        log_representative.extend([{"role": "assistant", "content": answer}])
+        log_interviewer.extend([{"role": "user", "content": answer}])
     return log_representative 
-    """
-    record =                    log_representative
-    path =                      f"./examples/{formatted_time()}.json" 
-    data =                      {"record": record}
-    with open(path, "w") as f:
-        json.dump(data)
-    """
+    

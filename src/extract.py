@@ -97,7 +97,7 @@ def extract_points(chunk, topics):
     #print(json.dumps(json.loads(encoded_data), indent=4))
     return encoded_data
 
-def extract_chunk(chunk, extraction_count:int = 5):
+def extract_chunk(chunk, extraction_count:int = 3):
     extractions =           []
     for i in range(extraction_count): 
         topics =            []
