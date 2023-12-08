@@ -1,4 +1,4 @@
-# Paper to podcast #
+# 🤖 🎤 Paper to podcast #
 ---
 
 Convert any paper to a byte sized interview style summary podcast. Hacked together in a weekend using GPT 4 and Suno Bark
